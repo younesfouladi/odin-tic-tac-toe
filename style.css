@@ -102,6 +102,7 @@ body {
   grid-template-columns: minmax(150px, 200px) 1fr minmax(150px, 200px);
   align-items: center;
   justify-content: center;
+  display: none;
 }
 
 .player1-container,
@@ -135,7 +136,7 @@ body {
 .player-card .player-marker {
   width: 60%;
   background-color: var(--red-purple);
-  color: var(--yellow);
+  color: var(--white);
   border-radius: 3rem;
   text-align: center;
   padding: 0.5rem 0;
@@ -202,7 +203,7 @@ body {
 .game-board .board-cell {
   width: 200px;
   aspect-ratio: 1 / 1;
-  font-size: 5rem;
+  font-size: 6rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -241,15 +242,123 @@ body {
 }
 
 .x-marker {
-  background-color: var(--yellow);
-  color: var(--white);
+  color: var(--red-purple);
   font-weight: bold;
-  text-shadow: 1px 2px 3px #696415;
 }
 
 .o-marker {
+  color: var(--yellow);
+  font-weight: bold;
+}
+
+/* Selected Marker in form */
+.selected-mark {
+  color: var(--yellow);
+  position: relative;
+}
+
+.selected-mark::after {
+  content: "✓";
+  font-size: 2rem;
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgb(15, 110, 15);
+}
+
+/* Getting Player Name & Marker Page */
+.playername-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease-in-out;
+  gap: 1rem;
   background-color: var(--red-purple);
+}
+
+.playername-container .get-player-name {
+  border: none;
+  background-color: inherit;
+  padding: 1rem 0;
+  font-size: 1.5rem;
+  text-align: center;
+  color: var(--white);
+  transition: all 0.1s ease-out;
+  border-left: 1px dashed var(--white);
+  border-right: 1px dashed var(--white);
+}
+
+.playername-container .get-player-name::placeholder {
+  color: #ffa8ad;
+  text-align: center;
+}
+
+.playername-container .get-player-name:focus {
+  outline: none;
+}
+
+.playername-container .get-player-name:focus::placeholder {
+  opacity: 0;
+}
+
+.playername-container .get-player-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.get-player-mark div {
+  border-radius: 50%;
+  font-size: 10rem;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   color: var(--white);
   font-weight: bold;
-  text-shadow: 1px 2px 3px #7c7512;
+  cursor: pointer;
+}
+
+.get-player-mark div:hover {
+  color: var(--yellow);
+}
+
+.get-player-mark input {
+  position: absolute;
+  width: 100px;
+  aspect-ratio: 1 / 1;
+  opacity: 0;
+}
+
+.get-player-mark p {
+  color: var(--white);
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+}
+
+.playername-container .submit-player-btn {
+  background-color: var(--red-purple);
+  border: none;
+  padding: 1rem 2rem;
+  color: var(--white);
+  border-radius: 1rem;
+  transition: all 0.2s ease-in;
+  box-shadow: 1px 1px 10px rgb(212, 75, 84) inset;
+  font-size: 1.3rem;
+}
+
+.playername-container .submit-player-btn:hover {
+  box-shadow: none;
+  background-color: var(--white);
+  color: var(--red-purple);
+}
+
+form {
+  width: 100%;
 }
