@@ -341,6 +341,7 @@ body {
   font-weight: bold;
   font-size: 1.2rem;
   text-transform: uppercase;
+  text-align: center;
 }
 
 .playername-container .submit-player-btn {
@@ -362,4 +363,30 @@ body {
 
 form {
   width: 100%;
+}
+
+@media (max-width: 400px) {
+  .playername-container {
+    padding: 0 1rem;
+  }
+  .container {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+  }
+  .game-board {
+    grid-column: 1 / span 2;
+    grid-row: 1 / 2;
+  }
+  .game-board .board-cell {
+    width: 100px;
+  }
+  .player-card {
+    width: 150px;
+  }
+  .player1-container {
+    grid-row: 1 / 2;
+  }
+  .player2-container {
+    grid-row: 2 / 3;
+  }
 }
