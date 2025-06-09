@@ -207,6 +207,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
 }
 
 .game-board .board-cell:nth-child(1) {

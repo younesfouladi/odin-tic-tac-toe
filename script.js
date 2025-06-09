@@ -83,23 +83,46 @@ function PlayerOneChoiceFunction() {
   (function () {
     const cells = document.querySelectorAll(".board-cell");
     cells.forEach((cell, index) => {
-      if (cell.textContent === "" || cell.textContent === null)
-        cell.addEventListener("click", (e) => {
+      cell.addEventListener("click", (e) => {
+        if (cell.textContent == "" || cell.textContent == null) {
           e.target.textContent = players.one.marker;
           if (players.one.marker == "x") {
             cell.classList.add("x-marker");
           } else {
             cell.classList.add("o-marker");
           }
-          gameBoard.board[index] = 0;
-          console.log(index);
-        });
+          gameBoard.board[index] = 1;
+          // Call Other Function To Get Player2 Choice
+          if (gameBoard.board.includes(0)) {
+            PlayerTwoChoiceFunction();
+          }
+        }
+      });
     });
   })();
 }
 
+// Function For Filling Board Cell for Player Two (Computer for now)
+function PlayerTwoChoiceFunction() {
+  const cells = document.querySelectorAll(".board-cell");
+  const ai = (function () {
+    let random;
+    do {
+      random = Math.floor(Math.random() * 9);
+    } while (gameBoard.board[random] != 0);
+
+    if (cells[random].textContent == "" || cells[random].textContent == null) {
+      cells[random].textContent = players.two.marker;
+      gameBoard.board[random] = 2;
+    }
+  })();
+}
+
+// Game Logic Function - Calculating Winner
+function gameLogic() {}
+
 // Gameboard **************** OBJECT *************
 const gameBoard = {
-  board: ["", "", "", "", "", "", "", "", ""],
-  PlayerOneChoice: PlayerOneChoiceFunction(),
+  board: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  PlayersChoice: PlayerOneChoiceFunction(),
 };
