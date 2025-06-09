@@ -86,15 +86,27 @@ function PlayerOneChoiceFunction() {
       cell.addEventListener("click", (e) => {
         if (cell.textContent == "" || cell.textContent == null) {
           e.target.textContent = players.one.marker;
-          if (players.one.marker == "x") {
+          // For DOM Marker Style
+          if (players.one.marker == "X") {
             cell.classList.add("x-marker");
           } else {
             cell.classList.add("o-marker");
           }
           gameBoard.board[index] = 1;
-          // Call Other Function To Get Player2 Choice
-          if (gameBoard.board.includes(0)) {
-            PlayerTwoChoiceFunction();
+          // Calls game Logic to Chack Winner for player 1
+          if (gameLogic()) {
+            alert("Player 1 Won");
+            disableGame();
+          } else {
+            if (gameBoard.board.includes(0)) {
+              // Call Other Function To Get Player2 Choice
+              PlayerTwoChoiceFunction();
+              // Calls game logic again to check winner for player 2
+              if (gameLogic()) {
+                alert("player 2 Won");
+                disableGame();
+              }
+            }
           }
         }
       });
@@ -114,12 +126,62 @@ function PlayerTwoChoiceFunction() {
     if (cells[random].textContent == "" || cells[random].textContent == null) {
       cells[random].textContent = players.two.marker;
       gameBoard.board[random] = 2;
+      // For DOM Marker Style
+      if (players.two.marker == "X") {
+        cells[random].classList.add("x-marker");
+      } else {
+        cells[random].classList.add("o-marker");
+      }
     }
   })();
 }
 
 // Game Logic Function - Calculating Winner
-function gameLogic() {}
+function gameLogic() {
+  const board = gameBoard.board;
+  const emptyCellValue = 0;
+  // ALl POSSIBLE CONDITIONS FOR WINNING STATEMENT
+  const winningCombinations = [
+    // Rows
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    // Columns
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    // Diameter
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
+  // Looping winning statements
+  for (let i of winningCombinations) {
+    const [a, b, c] = i;
+    if (
+      board[a] !== emptyCellValue &&
+      board[a] === board[b] &&
+      board[a] === board[c]
+    ) {
+      if (board[a] === 1) {
+        return players.one.name;
+      } else {
+        return players.two.name;
+      }
+    }
+  }
+  // Tie Statement for game
+  return null;
+}
+
+// Disable GameBoard Cells on Dom after winning game
+function disableGame() {
+  const cells = document.querySelectorAll(".board-cell");
+  cells.forEach((cell) => {
+    cell.style.backgroundColor = "#fdebee";
+    cell.style.pointerEvents = "none";
+  });
+}
 
 // Gameboard **************** OBJECT *************
 const gameBoard = {
