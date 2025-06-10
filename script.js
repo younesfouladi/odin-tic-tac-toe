@@ -43,7 +43,7 @@ const changeSlectedMarkerColorForm = (function () {
     launchGame();
     // Sending Players Info to the Players Object
     (function () {
-      players.one = { name: p1name, marker: p1marker, score: 0 };
+      players.one = { name: p1name || "Player 1", marker: p1marker, score: 0 };
       players.two = {
         name: "Computer",
         marker: p1marker.toLowerCase() === "x" ? "O" : "X",
@@ -82,37 +82,32 @@ function PlayerOneChoiceFunction() {
     const cells = document.querySelectorAll(".board-cell");
     cells.forEach((cell, index) => {
       cell.addEventListener("click", (e) => {
-        if (cell.textContent == "" || cell.textContent == null) {
-          e.target.textContent = players.one.marker;
-          // For DOM Marker Style
-          if (players.one.marker === "X") {
-            cell.classList.add("x-marker");
-          } else {
-            cell.classList.add("o-marker");
-          }
-          gameBoard.board[index] = 1;
-          // Calls game Logic to Chack Winner for player 1
+        // Allow click only if the cell is empty and game is active
+        if (gameBoard.board[index] === 0 && gameBoard.isGameActive) {
+          // Player 1's move
+          updateCell(cell, index, 1, players.one.marker);
+
+          // Check for winner or tie after Player 1's move
           if (gameLogic()) {
-            alert("Player 1 Won");
-            disableGame();
-            nextRound();
+            endRound();
+          } else if (!gameBoard.board.includes(0)) {
+            // It's a tie
+            alert("Tie");
+            endRound();
           } else {
-            if (gameBoard.board.includes(0)) {
-              // Call Other Function To Get Player2 Choice
-              PlayerTwoChoiceFunction();
-              // Calls game logic again to check winner for player 2
+            // AI's turn
+            gameBoard.isGameActive = false; // Disable board during AI's turn
+            setTimeout(() => {
+              makeAIMove();
+              // Check for winner or tie after AI's move
               if (gameLogic()) {
-                alert("player 2 Won");
-                disableGame();
-                nextRound();
+                endRound();
+              } else if (!gameBoard.board.includes(0)) {
+                alert("Tie");
+                endRound();
               }
-            }
-            // Tie Statement
-            else {
-              alert("Tie");
-              disableGame();
-              nextRound();
-            }
+              gameBoard.isGameActive = true; // Re-enable board after AI's turn
+            }, 500); // A small delay for AI move to feel more natural
           }
         }
       });
@@ -120,67 +115,132 @@ function PlayerOneChoiceFunction() {
   })();
 }
 
-// Function For Filling Board Cell for Player Two (Computer for now)
-function PlayerTwoChoiceFunction() {
-  const cells = document.querySelectorAll(".board-cell");
-  const ai = (function () {
-    let random;
-    do {
-      random = Math.floor(Math.random() * 9);
-    } while (gameBoard.board[random] != 0);
+// --- START OF AI IMPLEMENTATION (MINIMAX) ---
 
-    if (cells[random].textContent == "" || cells[random].textContent == null) {
-      cells[random].textContent = players.two.marker;
-      gameBoard.board[random] = 2;
-      // For DOM Marker Style
-      if (players.two.marker == "X") {
-        cells[random].classList.add("x-marker");
-      } else {
-        cells[random].classList.add("o-marker");
+// This function makes the AI move.
+function makeAIMove() {
+  const bestMoveIndex = findBestMove();
+  if (bestMoveIndex !== -1) {
+    const cell = document.querySelectorAll(".board-cell")[bestMoveIndex];
+    updateCell(cell, bestMoveIndex, 2, players.two.marker);
+  }
+}
+
+// This function finds the best move for the AI.
+function findBestMove() {
+  let bestScore = -Infinity;
+  let move = -1;
+  for (let i = 0; i < gameBoard.board.length; i++) {
+    // Is the spot available?
+    if (gameBoard.board[i] === 0) {
+      gameBoard.board[i] = 2; // AI's player number is 2
+      let score = minimax(gameBoard.board, 0, false);
+      gameBoard.board[i] = 0; // Undo the move
+      if (score > bestScore) {
+        bestScore = score;
+        move = i;
       }
     }
-  })();
+  }
+  return move;
+}
+
+// The Minimax algorithm function
+function minimax(board, depth, isMaximizing) {
+  let result = checkWinner(board);
+  if (result !== null) {
+    if (result === 2) return 10 - depth; // AI (Maximizer) wins
+    if (result === 1) return -10 + depth; // Player (Minimizer) wins
+    return 0; // Tie
+  }
+
+  if (isMaximizing) {
+    // AI's turn
+    let bestScore = -Infinity;
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === 0) {
+        board[i] = 2;
+        let score = minimax(board, depth + 1, false);
+        board[i] = 0;
+        bestScore = Math.max(score, bestScore);
+      }
+    }
+    return bestScore;
+  } else {
+    // Player's turn
+    let bestScore = Infinity;
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === 0) {
+        board[i] = 1;
+        let score = minimax(board, depth + 1, true);
+        board[i] = 0;
+        bestScore = Math.min(score, bestScore);
+      }
+    }
+    return bestScore;
+  }
+}
+
+// Helper function to check winner without side-effects (for AI analysis)
+function checkWinner(board) {
+  const winningCombinations = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8], // Rows
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8], // Columns
+    [0, 4, 8],
+    [2, 4, 6], // Diagonals
+  ];
+
+  for (let combination of winningCombinations) {
+    const [a, b, c] = combination;
+    if (board[a] !== 0 && board[a] === board[b] && board[a] === board[c]) {
+      return board[a]; // Returns 1 for player, 2 for AI
+    }
+  }
+
+  if (!board.includes(0)) {
+    return 0; // Tie
+  }
+
+  return null; // Game is not over
+}
+
+// --- END OF AI IMPLEMENTATION ---
+
+// A helper function to update a cell on the board and in the DOM
+function updateCell(cellElement, index, playerNumber, marker) {
+  gameBoard.board[index] = playerNumber;
+  cellElement.textContent = marker;
+  cellElement.classList.add(
+    marker.toLowerCase() === "x" ? "x-marker" : "o-marker"
+  );
 }
 
 // Game Logic Function - Calculating Winner
 function gameLogic() {
-  const board = gameBoard.board;
-  const emptyCellValue = 0;
-  // ALl POSSIBLE CONDITIONS FOR WINNING STATEMENT
-  const winningCombinations = [
-    // Rows
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    // Columns
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    // Diameter
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-
-  // Looping winning statements
-  for (let i of winningCombinations) {
-    const [a, b, c] = i;
-    if (
-      board[a] !== emptyCellValue &&
-      board[a] === board[b] &&
-      board[a] === board[c]
-    ) {
-      if (board[a] === 1) {
-        strikeLine();
-        giveRoundPoints(1);
-        return players.one.name;
-      } else if (board[a] === 2) {
-        strikeLine();
-        giveRoundPoints(2);
-        return players.two.name;
-      }
-      return null;
+  const winner = checkWinner(gameBoard.board);
+  if (winner) {
+    if (winner === 1) {
+      alert(`${players.one.name} Won!`);
+      giveRoundPoints(1);
+    } else if (winner === 2) {
+      alert(`${players.two.name} Won!`);
+      giveRoundPoints(2);
     }
+    strikeLine();
+    return true;
   }
+  return false;
+}
+
+//Ends the round and shows the "Next Round" button
+function endRound() {
+  gameBoard.isGameActive = false; // Stop further moves
+  disableGame();
+  nextRound();
 }
 
 // Drawing Strike Line Function
@@ -213,33 +273,36 @@ function disableGame() {
   const cells = document.querySelectorAll(".board-cell");
   cells.forEach((cell) => {
     cell.style.backgroundColor = "#fdebee";
-    cell.style.pointerEvents = "none";
   });
 }
 function enableGame() {
   const cells = document.querySelectorAll(".board-cell");
   cells.forEach((cell) => {
     cell.style.backgroundColor = "inherit";
-    cell.style.pointerEvents = "all";
   });
 }
 // Reset Board & Go for Next Round
 function nextRound() {
   const nextRoundBtn = document.querySelector(".next-round");
   nextRoundBtn.style.display = "block";
-  nextRoundBtn.addEventListener("click", () => {
-    nextRoundBtn.style.display = "none";
-    enableGame();
-    document.querySelector("#strike-line").setAttribute("class", "");
-    for (let i = 0; i < gameBoard.board.length; i++) {
-      gameBoard.board[i] = 0;
-    }
-    const cells = document.querySelectorAll(".board-cell");
-    cells.forEach((cell) => {
-      cell.textContent = "";
-      cell.classList.remove("x-marker", "o-marker");
-    });
-  });
+  nextRoundBtn.addEventListener(
+    "click",
+    () => {
+      nextRoundBtn.style.display = "none";
+      enableGame();
+      document.querySelector("#strike-line").setAttribute("class", "");
+      for (let i = 0; i < gameBoard.board.length; i++) {
+        gameBoard.board[i] = 0;
+      }
+      const cells = document.querySelectorAll(".board-cell");
+      cells.forEach((cell) => {
+        cell.textContent = "";
+        cell.classList.remove("x-marker", "o-marker");
+      });
+      gameBoard.isGameActive = true;
+    },
+    { once: true }
+  ); // Use {once: true} to prevent multiple event listeners
 }
 
 // Give Score Points to the Players
@@ -257,7 +320,8 @@ function giveRoundPoints(winner) {
 
 // Gameboard **************** OBJECT *************
 const gameBoard = {
-  board: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  board: [0, 0, 0, 0, 0, 0, 0, 0, 0], // 0: empty, 1: player1, 2: player2
+  isGameActive: true, // To control when moves can be made
   PlayersChoice: PlayerOneChoiceFunction(),
 };
 
