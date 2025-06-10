@@ -92,12 +92,11 @@ body {
 body {
   display: flex;
   justify-content: center;
-  align-items: center;
 }
 
 .container {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   display: grid;
   grid-template-columns: minmax(150px, 200px) 1fr minmax(150px, 200px);
   align-items: center;
@@ -379,11 +378,12 @@ form {
     padding: 0;
     margin-top: 1rem;
     align-items: start;
+    height: fit-content;
   }
   .player-card {
     width: 150px;
     align-self: center;
-    margin-top: -2rem;
+    margin-top: -1rem;
   }
   .player1-container {
     grid-row: 2;
@@ -428,6 +428,18 @@ form {
     font-size: 4rem;
   }
 }
+
+@media (max-width: 425px) {
+  .player-card {
+    margin-top: -1.5rem;
+  }
+}
+@media (max-width: 375px) {
+  .player-card {
+    margin-top: -2.2rem;
+  }
+}
+
 /* Line For Winner Marks */
 #strike-line {
   position: absolute;
