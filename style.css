@@ -86,23 +86,24 @@ h6 {
 html,
 body {
   width: 100%;
+  height: 100%;
 }
 
 body {
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .container {
-  width: 80%;
+  width: 100%;
   height: 100vh;
   display: grid;
   grid-template-columns: minmax(150px, 200px) 1fr minmax(150px, 200px);
   align-items: center;
   justify-content: center;
   display: none;
+  padding: 0 5rem;
 }
 
 .player1-container,
@@ -182,26 +183,28 @@ body {
   font-size: 1rem;
 }
 
-.game-container .player-turn {
+.game-container .next-round {
   background-color: var(--yellow);
   padding: 1rem 3rem;
   border-radius: 2rem;
   font-size: 1.2rem;
+  cursor: pointer;
+  display: none;
 }
 
 /* Board Design */
 .game-board {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(50px, 200px));
   padding: 1rem;
   border: 2px dashed var(--red-purple);
   border-radius: 2rem;
-  gap: 0.1rem;
   background-color: var(--white);
+  max-width: fit-content;
+  position: relative;
 }
 
 .game-board .board-cell {
-  width: 200px;
   aspect-ratio: 1 / 1;
   font-size: 6rem;
   display: flex;
@@ -365,28 +368,119 @@ form {
   width: 100%;
 }
 
-@media (max-width: 400px) {
+@media (max-width: 450px) {
   .playername-container {
     padding: 0 1rem;
   }
   .container {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-  }
-  .game-board {
-    grid-column: 1 / span 2;
-    grid-row: 1 / 2;
-  }
-  .game-board .board-cell {
-    width: 100px;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 2fr 1fr;
+    height: 100%;
+    padding: 0;
+    margin-top: 1rem;
+    align-items: start;
   }
   .player-card {
     width: 150px;
+    align-self: center;
+    margin-top: -2rem;
   }
   .player1-container {
-    grid-row: 1 / 2;
+    grid-row: 2;
   }
   .player2-container {
-    grid-row: 2 / 3;
+    grid-row: 2;
   }
+  .round-number,
+  .next-round {
+    justify-self: center;
+  }
+  .game-container .next-round {
+    padding: 0.5rem 1rem;
+    font-size: 1.2rem;
+  }
+  .game-container {
+    grid-column: 1 / -1;
+    gap: 1rem;
+  }
+  .player1-container .player-scores-container,
+  .player2-container .player-scores-container {
+    width: 85%;
+    padding: 0.5rem;
+    align-self: center;
+  }
+  .game-container .round-number {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+  .game-container .round-number h4 {
+    font-size: 1.5rem;
+  }
+
+  .game-container .round-number p {
+    font-size: 0.8rem;
+  }
+  .game-board {
+    width: 90%;
+    justify-self: center;
+  }
+  .game-board .board-cell {
+    font-size: 4rem;
+  }
+}
+/* Line For Winner Marks */
+#strike-line {
+  position: absolute;
+  background-color: black;
+}
+
+.strike-row1 {
+  width: 90%;
+  height: 5px;
+  top: 19%;
+  left: 5%;
+}
+.strike-row2 {
+  width: 90%;
+  height: 5px;
+  top: 49%;
+  left: 5%;
+}
+.strike-row3 {
+  width: 90%;
+  height: 5px;
+  bottom: 19%;
+  left: 5%;
+}
+.strike-col1 {
+  width: 5px;
+  height: 90%;
+  top: 5%;
+  left: 19%;
+}
+.strike-col2 {
+  width: 5px;
+  height: 90%;
+  top: 5%;
+  left: 49%;
+}
+.strike-col3 {
+  width: 5px;
+  height: 90%;
+  top: 5%;
+  right: 19%;
+}
+.strike-diag1 {
+  width: 5px;
+  height: 115%;
+  left: 50%;
+  top: -7%;
+  transform: rotate(-45deg);
+}
+.strike-diag2 {
+  width: 5px;
+  height: 115%;
+  right: 50%;
+  top: -7%;
+  transform: rotate(45deg);
 }

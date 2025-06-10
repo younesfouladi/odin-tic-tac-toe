@@ -32,9 +32,6 @@ const changeSlectedMarkerColorForm = (function () {
   });
 })();
 
-// Global Player Details OBJECT
-let players = {};
-
 // Function for Get Players Name & Marker (form submission)
 (function () {
   document.querySelector("#get-players").addEventListener("submit", (e) => {
@@ -46,10 +43,11 @@ let players = {};
     launchGame();
     // Sending Players Info to the Players Object
     (function () {
-      players.one = { name: p1name, marker: p1marker };
+      players.one = { name: p1name, marker: p1marker, score: 0 };
       players.two = {
         name: "Computer",
         marker: p1marker.toLowerCase() === "x" ? "O" : "X",
+        score: 0,
       };
     })();
     putPlayersOnPage();
@@ -87,7 +85,7 @@ function PlayerOneChoiceFunction() {
         if (cell.textContent == "" || cell.textContent == null) {
           e.target.textContent = players.one.marker;
           // For DOM Marker Style
-          if (players.one.marker == "X") {
+          if (players.one.marker === "X") {
             cell.classList.add("x-marker");
           } else {
             cell.classList.add("o-marker");
@@ -97,6 +95,7 @@ function PlayerOneChoiceFunction() {
           if (gameLogic()) {
             alert("Player 1 Won");
             disableGame();
+            nextRound();
           } else {
             if (gameBoard.board.includes(0)) {
               // Call Other Function To Get Player2 Choice
@@ -105,7 +104,14 @@ function PlayerOneChoiceFunction() {
               if (gameLogic()) {
                 alert("player 2 Won");
                 disableGame();
+                nextRound();
               }
+            }
+            // Tie Statement
+            else {
+              alert("Tie");
+              disableGame();
+              nextRound();
             }
           }
         }
@@ -164,14 +170,42 @@ function gameLogic() {
       board[a] === board[c]
     ) {
       if (board[a] === 1) {
+        strikeLine();
+        giveRoundPoints(1);
         return players.one.name;
-      } else {
+      } else if (board[a] === 2) {
+        strikeLine();
+        giveRoundPoints(2);
         return players.two.name;
       }
+      return null;
     }
   }
-  // Tie Statement for game
-  return null;
+}
+
+// Drawing Strike Line Function
+function strikeLine() {
+  const winningCombinations = [
+    // Rows
+    { combo: [0, 1, 2], strikeClass: "strike-row1" },
+    { combo: [3, 4, 5], strikeClass: "strike-row2" },
+    { combo: [6, 7, 8], strikeClass: "strike-row3" },
+    // Columns
+    { combo: [0, 3, 6], strikeClass: "strike-col1" },
+    { combo: [1, 4, 7], strikeClass: "strike-col2" },
+    { combo: [2, 5, 8], strikeClass: "strike-col3" },
+    // Diagonals
+    { combo: [0, 4, 8], strikeClass: "strike-diag1" },
+    { combo: [2, 4, 6], strikeClass: "strike-diag2" },
+  ];
+  for (const { combo, strikeClass } of winningCombinations) {
+    const [a, b, c] = combo;
+    const board = gameBoard.board;
+    if (board[a] !== 0 && board[a] === board[b] && board[a] === board[c]) {
+      const strikeLine = document.querySelector("#strike-line");
+      strikeLine.classList.add(strikeClass);
+    }
+  }
 }
 
 // Disable GameBoard Cells on Dom after winning game
@@ -182,9 +216,50 @@ function disableGame() {
     cell.style.pointerEvents = "none";
   });
 }
+function enableGame() {
+  const cells = document.querySelectorAll(".board-cell");
+  cells.forEach((cell) => {
+    cell.style.backgroundColor = "inherit";
+    cell.style.pointerEvents = "all";
+  });
+}
+// Reset Board & Go for Next Round
+function nextRound() {
+  const nextRoundBtn = document.querySelector(".next-round");
+  nextRoundBtn.style.display = "block";
+  nextRoundBtn.addEventListener("click", () => {
+    nextRoundBtn.style.display = "none";
+    enableGame();
+    document.querySelector("#strike-line").setAttribute("class", "");
+    for (let i = 0; i < gameBoard.board.length; i++) {
+      gameBoard.board[i] = 0;
+    }
+    const cells = document.querySelectorAll(".board-cell");
+    cells.forEach((cell) => {
+      cell.textContent = "";
+      cell.classList.remove("x-marker", "o-marker");
+    });
+  });
+}
+
+// Give Score Points to the Players
+function giveRoundPoints(winner) {
+  const playerOneScore = document.querySelector(".player1-score");
+  const playerTwoScore = document.querySelector(".player2-score");
+  if (winner === 1) {
+    players.one.score += 1;
+    playerOneScore.textContent = players.one.score;
+  } else if (winner === 2) {
+    players.two.score += 1;
+    playerTwoScore.textContent = players.two.score;
+  }
+}
 
 // Gameboard **************** OBJECT *************
 const gameBoard = {
   board: [0, 0, 0, 0, 0, 0, 0, 0, 0],
   PlayersChoice: PlayerOneChoiceFunction(),
 };
+
+// Global Player Details OBJECT
+let players = {};
