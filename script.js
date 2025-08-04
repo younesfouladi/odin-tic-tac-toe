@@ -111,6 +111,38 @@ function PlayerOneChoiceFunction() {
           }
         }
       });
+      cell.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          // Allow click only if the cell is empty and game is active
+          if (gameBoard.board[index] === 0 && gameBoard.isGameActive) {
+            // Player 1's move
+            updateCell(cell, index, 1, players.one.marker);
+
+            // Check for winner or tie after Player 1's move
+            if (gameLogic()) {
+              endRound();
+            } else if (!gameBoard.board.includes(0)) {
+              // It's a tie
+              alert("Tie");
+              endRound();
+            } else {
+              // AI's turn
+              gameBoard.isGameActive = false; // Disable board during AI's turn
+              setTimeout(() => {
+                makeAIMove();
+                // Check for winner or tie after AI's move
+                if (gameLogic()) {
+                  endRound();
+                } else if (!gameBoard.board.includes(0)) {
+                  alert("Tie");
+                  endRound();
+                }
+                gameBoard.isGameActive = true; // Re-enable board after AI's turn
+              }, 500); // A small delay for AI move to feel more natural
+            }
+          }
+        }
+      });
     });
   })();
 }
@@ -285,6 +317,7 @@ function enableGame() {
 function nextRound() {
   const nextRoundBtn = document.querySelector(".next-round");
   nextRoundBtn.style.display = "block";
+  nextRoundBtn.addEventListener("keydown", nextRoundKeyHandler);
   nextRoundBtn.addEventListener(
     "click",
     () => {
@@ -303,6 +336,25 @@ function nextRound() {
     },
     { once: true }
   ); // Use {once: true} to prevent multiple event listeners
+}
+
+function nextRoundKeyHandler(e) {
+  const nextRoundBtn = document.querySelector(".next-round");
+
+  if (e.key === "Enter" || e.key === " ") {
+    nextRoundBtn.style.display = "none";
+    enableGame();
+    document.querySelector("#strike-line").setAttribute("class", "");
+    for (let i = 0; i < gameBoard.board.length; i++) {
+      gameBoard.board[i] = 0;
+    }
+    const cells = document.querySelectorAll(".board-cell");
+    cells.forEach((cell) => {
+      cell.textContent = "";
+      cell.classList.remove("x-marker", "o-marker");
+    });
+    gameBoard.isGameActive = true;
+  }
 }
 
 // Give Score Points to the Players
